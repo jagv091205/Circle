@@ -145,17 +145,26 @@ export default function Profile() {
   };
 
   const deleteOldPhoto = async (photoURL) => {
-    try {
-      if (photoURL && photoURL.includes('firebase')) {
-        // Extract the path from Firebase Storage URL and delete old photo
-        const photoRef = ref(storage, photoURL);
-        await deleteObject(photoRef);
+  try {
+    if (photoURL && photoURL.includes('firebase') && photoURL.includes('profile-photos')) {
+      // Extract the path from Firebase Storage URL
+      const baseUrl = 'https://firebasestorage.googleapis.com/v0/b/';
+      const urlParts = photoURL.split(baseUrl)[1];
+      if (urlParts) {
+        const pathParts = urlParts.split('/o/')[1];
+        if (pathParts) {
+          const filePath = decodeURIComponent(pathParts.split('?')[0]);
+          const photoRef = ref(storage, filePath);
+          await deleteObject(photoRef);
+          console.log('Old photo deleted successfully');
+        }
       }
-    } catch (err) {
-      console.error('Error deleting old photo:', err);
-      // Don't throw error as it's not critical
     }
-  };
+  } catch (err) {
+    console.error('Error deleting old photo:', err);
+    // Don't throw error as it's not critical
+  }
+};
 
   const handleSave = async () => {
     try {
